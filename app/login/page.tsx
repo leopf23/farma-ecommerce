@@ -38,7 +38,7 @@ export default function Page() {
   }
 
   return (
-    <main className="flex md:flex-row flex-col bg-[#f6f7fb] min-h-screen">
+    <main className="flex md:flex-row flex-col min-h-screen">
 
     {/* Background Image */}
       <aside
@@ -52,7 +52,7 @@ export default function Page() {
 
     {/* Form*/}
       <section className="flex flex-[0.9] justify-center items-center p-12 sm:p-5 md:p-12">
-        <div className="bg-white shadow-md p-7 rounded-lg w-full max-w-md">
+        <div className="bg-white p-7 rounded-lg w-full max-w-md">
            <Image
                 src="/logo.png"
                 alt="Vercel logomark"
