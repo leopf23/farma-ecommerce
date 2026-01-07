@@ -108,9 +108,9 @@ export default function Page() {
                             <a className="text-blue-500 text-sm">Olvidaste tu contraseña ?</a>
                         </div>
 
-                        <button className="bg-blue-500 hover:bg-blue-600 mt-2 py-3 rounded-lg w-full font-semibold text-white" type="submit">Iniciar sesión</button>
+                        <button className="bg-blue-500 hover:bg-blue-600 mt-2 py-3 rounded-lg w-full font-semibold text-white cursor-pointer" type="submit">Iniciar sesión</button>
 
-                        <button type="button" className="flex justify-center items-center gap-2 bg-gray-800 mt-3 py-3 rounded-lg w-full text-white">
+                        <button type="button" className="flex justify-center items-center gap-2 bg-gray-800 mt-3 py-3 rounded-lg w-full text-white cursor-pointer">
                             <span className="bg-white px-2 py-0.5 rounded text-black">G</span> Iniciar con google
                         </button>
 
