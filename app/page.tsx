@@ -36,17 +36,25 @@ export default function Home() {
 
         <MultiCard />
         
-        <div>
+        <div className="my-15">
           <h2 className="p-10 font-bold text-[#373577] text-2xl text-center">Categorias populares</h2>
+          <div className="flex md:flex-row flex-col justify-center gap-5">
+            <span className="items-center bg-[#ECF4F6] hover:bg-[#373577] px-5 py-2 rounded-full text-[#373577] text-[1rem] hover:text-white cursor-pointer">suplementos</span>
+            <span className="items-center bg-[#ECF4F6] hover:bg-[#373577] px-5 py-2 rounded-full text-[#373577] text-[1rem] hover:text-white cursor-pointer">Medicamentos</span>
+            <span className="items-center bg-[#ECF4F6] hover:bg-[#373577] px-5 py-2 rounded-full text-[#373577] text-[1rem] hover:text-white cursor-pointer">Belleza</span>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
-          <CardProduct image="" category="Proteina" title="Premium whey Proteina" price={100}/>
-          <CardProduct image="" category="Proteina" title="BCAA Aminoácido..." price={1500}/>
-          <CardProduct image="" category="Proteina" title="Multi-vitaminas" price={3000}/>
-          <CardProduct image="" category="Proteina" title="Premium whey Proteina" price={4000}/>
-          <CardProduct image="" category="Proteina" title="BCAA Aminoácido..." price={7000}/>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 mb-15">
+          <CardProduct image="/profile.png" category="Proteina" title="Premium whey Proteina" price={100}/>
+          <CardProduct image="/profile.png" category="Proteina" title="BCAA Aminoácido..." price={1500}/>
+          <CardProduct image="/profile.png" category="Proteina" title="Multi-vitaminas" price={3000}/>
+          <CardProduct image="/profile.png" category="Proteina" title="Premium whey Proteina" price={4000}/>
+          <CardProduct image="/profile.png" category="Proteina" title="BCAA Aminoácido..." price={7000}/>
         </div>
+
+
+        <div>Banner publicitario</div>
       </main>
     </div>
   );
