@@ -10,6 +10,7 @@ import { GiMirrorMirror } from "react-icons/gi";
 import MultiCard from "./component/multiCard";
 import CardProduct from "./component/cardProduct";
 import HorizontalProduct from "./component/horizontalProduct";
+import Footer from "./component/footer";
 
 export default function Home() {
   const categories = [
@@ -25,8 +26,10 @@ export default function Home() {
       <Header />
       <main className="p-5 md:px-25 min-h-screen">
 
+        {/* banner home  */}
         <Banner imageUrl={"/banner-web.jpg"} />
 
+        {/* Categories items */}
         <div className="justify-items-center grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 p-10">
           {categories.map(({ label, Icon }) => (
             <div key={label} className="flex items-center hover:bg-[#2c27af09] p-2 rounded-xl text-[#2B27AF] cursor-pointer">
@@ -36,6 +39,8 @@ export default function Home() {
           ))}
         </div>
 
+
+        {/* MultiCard component */}
         <MultiCard />
 
         {/* category */}
@@ -47,7 +52,6 @@ export default function Home() {
             <span className="items-center self-center bg-[#ECF4F6] hover:bg-[#373577] px-5 py-2 rounded-full text-[#373577] text-[1rem] hover:text-white cursor-pointer">Belleza</span>
           </div>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 mb-15">
           <CardProduct image="/profile.png" category="Proteina" title="Premium whey Proteina" price={100} />
           <CardProduct image="/profile.png" category="Proteina" title="BCAA Aminoácido..." price={1500} />
@@ -56,14 +60,13 @@ export default function Home() {
           <CardProduct image="/profile.png" category="Proteina" title="BCAA Aminoácido..." price={7000} />
         </div>
 
-
+        {/* Banner section */}
         <div>
           <Banner
             height="h-45"
             width="w-full"
             imageUrl={"/banner2.png"} />
         </div>
-
 
 
         {/* prodcutos destacados */}
@@ -83,13 +86,16 @@ export default function Home() {
 
 
         {/* more products for you  */}
-                <h2 className="my-15 font-bold text-[#373577] text-2xl text-center">Más productos para ti</h2>
+        <h2 className="my-15 font-bold text-[#373577] text-2xl text-center">Más productos para ti</h2>
         <div className="gap-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-15">
           <HorizontalProduct image="/profile.png" title="Premium whey Proteina" price={100} />
           <HorizontalProduct image="/profile.png" title="Premium whey Proteina" price={100} />
           <HorizontalProduct image="/profile.png" title="Premium whey Proteina" price={100} />
         </div>
       </main>
+
+      {/* footer */}
+      <Footer />
     </div>
   );
 }

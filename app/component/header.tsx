@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { FiSearch, FiPhone, FiChevronDown, FiMenu, FiX, FiShoppingCart, FiHeart, FiRepeat } from 'react-icons/fi'
 
 const CATEGORIES = [
@@ -55,9 +56,9 @@ export default function Header() {
             >
               <FiMenu size={20} />
             </button>
-            <a href="#" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               <img src="/logo.png" alt="logo" className="w-auto h-10 object-contain" />
-            </a>
+            </Link>
           </div>
 
           {/* Center: Search - stacked on mobile */}
