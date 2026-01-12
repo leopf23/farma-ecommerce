@@ -11,7 +11,7 @@ type CardProductProps = {
 
 export default function CardProduct({ image, category, title, price }: CardProductProps) {
     return (
-        <div className="flex flex-col items-center gap-4 mx-auto max-w-xs">
+        <div className="flex flex-col items-center gap-4 mx-auto mb-10 max-w-xs">
             {/* Image container with light background */}
             <div className="relative flex justify-center items-center bg-linear-to-br from-gray-100 to-gray-50 p-6 rounded-2xl w-full min-h-64 overflow-hidden">
                 <Image

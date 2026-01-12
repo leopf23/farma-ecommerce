@@ -1,9 +1,13 @@
-import React from 'react'
+interface BannerProps {
+  imageUrl: string;
+  width?: string;
+  height?: string;
+}
 
-export default function banner() {
+export default function Banner({ imageUrl, width = "w-full", height = "h-96" }: BannerProps) {
   return (
-    <div className="bg-cover bg-no-repeat bg-center rounded-lg w-full h-96 overflow-hidden"
-         style={{ backgroundImage: 'url(/banner-web.jpg)' }}>
+    <div className={`bg-cover bg-no-repeat bg-center rounded-lg ${width} ${height} overflow-hidden`}
+         style={{ backgroundImage: `url(${imageUrl})` }}>
     </div>
   )
 }
