@@ -24,24 +24,24 @@ export default function Footer() {
                             <p>No. 104, Plaza Corona</p>
                         </div>
 
-                        <a href="#" className="font-medium text-blue-600 text-sm hover:underline">
+                        <Link href="#" className="font-medium text-blue-600 text-sm hover:underline">
                             Ver en mapa
-                        </a>
+                        </Link>
 
                         {/* Social Icons */}
                         <div className="flex gap-4">
-                            <a href="#" className="text-blue-600 hover:text-blue-800 text-xl">
+                            <Link href="#" className="text-blue-600 hover:text-blue-800 text-xl">
                                 <FaFacebook />
-                            </a>
-                            <a href="#" className="text-pink-500 hover:text-pink-700 text-xl">
+                            </Link>
+                            <Link href="#" className="text-pink-500 hover:text-pink-700 text-xl">
                                 <FaInstagram />
-                            </a>
-                            <a href="#" className="text-blue-700 hover:text-blue-900 text-xl">
+                            </Link>
+                            <Link href="#" className="text-blue-700 hover:text-blue-900 text-xl">
                                 <FaLinkedin />
-                            </a>
-                            <a href="#" className="text-black hover:text-gray-700 text-xl">
+                            </Link>
+                            <Link href="#" className="text-black hover:text-gray-700 text-xl">
                                 <BsTwitterX />
-                            </a>
+                            </Link>
                         </div>
                     </div>
 
@@ -58,10 +58,10 @@ export default function Footer() {
                             <p>y Domingo 7:00am a 10:00pm</p>
                         </div>
 
-                        <a href="mailto:farmaextra@gmail.com" className="flex items-center gap-2 font-medium text-blue-600 text-sm hover:underline">
+                        <Link href="mailto:farmaextra@gmail.com" className="flex items-center gap-2 font-medium text-blue-600 text-sm hover:underline">
                             <FiMail size={16} />
                             farmaextra@gmail.com
-                        </a>
+                        </Link>
                     </div>
 
                     {/* Menu Section - Hidden on mobile, shown on md+ */}
@@ -69,13 +69,13 @@ export default function Footer() {
                         <h3 className="font-semibold text-gray-800 text-base">Menu</h3>
                         <ul className="space-y-2 text-gray-700 text-sm">
                             <li>
-                                <a href="#" className="hover:text-blue-600 transition">Mis Ordenes</a>
+                                <Link href="#" className="hover:text-blue-600 transition">Mis Ordenes</Link>
                             </li>
                             <li>
-                                <a href="#" className="hover:text-blue-600 transition">Soporte</a>
+                                <Link href="#" className="hover:text-blue-600 transition">Soporte</Link>
                             </li>
                             <li>
-                                <a href="#" className="hover:text-blue-600 transition">Sucursales</a>
+                                <Link href="#" className="hover:text-blue-600 transition">Sucursales</Link>
                             </li>
                         </ul>
                     </div>

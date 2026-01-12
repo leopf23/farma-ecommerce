@@ -86,8 +86,11 @@ export default function Home() {
 
 
         {/* more products for you  */}
-        <h2 className="my-15 font-bold text-[#373577] text-2xl text-center">Más productos para ti</h2>
+        <h2 className="my-10 font-bold text-[#373577] text-2xl text-center">Más productos para ti</h2>
         <div className="gap-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-15">
+          <HorizontalProduct image="/profile.png" title="Premium whey Proteina" price={100} />
+          <HorizontalProduct image="/profile.png" title="Premium whey Proteina" price={100} />
+          <HorizontalProduct image="/profile.png" title="Premium whey Proteina" price={100} />
           <HorizontalProduct image="/profile.png" title="Premium whey Proteina" price={100} />
           <HorizontalProduct image="/profile.png" title="Premium whey Proteina" price={100} />
           <HorizontalProduct image="/profile.png" title="Premium whey Proteina" price={100} />
