@@ -65,11 +65,11 @@ export default function ProductViewer({ images, title, unitPrice }: ProductViewe
 
         <div className="bg-gray-50 mt-6 p-4 rounded-lg max-w-sm">
           <div className="flex items-center gap-3">
-            <button onClick={decrease} className="flex justify-center items-center bg-white border rounded-full w-10 h-10">
+            <button onClick={decrease} className="flex justify-center items-center bg-white border rounded-full w-10 h-10 cursor-pointer">
               <FiMinus />
             </button>
             <div className="bg-white px-6 py-2 rounded-md w-20 text-center">{qty}</div>
-            <button onClick={increase} className="flex justify-center items-center bg-white border rounded-full w-10 h-10">
+            <button onClick={increase} className="flex justify-center items-center bg-white border rounded-full w-10 h-10 cursor-pointer">
               <FiPlus />
             </button>
 
@@ -78,8 +78,8 @@ export default function ProductViewer({ images, title, unitPrice }: ProductViewe
           </div>
 
           <div className="flex gap-3 mt-4">
-            <button className="flex-1 bg-[#2B27AF] py-3 rounded-full text-white">Agregar al carrito</button>
-            <button className="flex-1 bg-red-500 py-3 rounded-full text-white">Comprar a hora</button>
+            <button className="flex-1 bg-[#2B27AF] py-3 rounded-full text-white cursor-pointer">Agregar al carrito</button>
+            <button className="flex-1 bg-red-500 py-3 rounded-full text-white cursor-pointer">Comprar a hora</button>
           </div>
         </div>
 
