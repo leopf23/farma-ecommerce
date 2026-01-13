@@ -154,11 +154,11 @@ export default function ProductViewer({ images, title, unitPrice }: ProductViewe
 
 
       {/* similar products  */}
-      <h2 className="mt-10 mb-5 font-bold text-[#373577] text-2xl">
+      <h2 className="my-15 font-bold text-[#373577] text-2xl text-center">
         Productos similares
       </h2>
 
-      <div className="block md:flex mb-20">
+      <div className="block lg:flex md:grid grid-cols-2 mb-20">
         <CardProduct image="/profile.png" category="Proteina" title="Premium whey Proteina" price={100} />
         <CardProduct image="/profile.png" category="Proteina" title="BCAA Aminoácido" price={1500} />
         <CardProduct image="/profile.png" category="Proteina" title="Multi-vitaminas" price={3000} />
