@@ -13,7 +13,7 @@ type SideStatsProps = {
 
 export default function SideList({ items }: SideStatsProps) {
   return (
-    <ul className="flex md:flex-col gap-3">
+    <ul className="block md:flex-col gap-3">
       {items.map((item, index) => {
         const Icon = item.icon;
 
