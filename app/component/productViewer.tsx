@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { FiPlus, FiMinus, FiX, FiChevronLeft, FiChevronRight, FiDroplet, FiSettings, FiActivity } from 'react-icons/fi'
+import { FiPlus, FiMinus, FiX, FiChevronLeft, FiChevronRight,FiHash, FiGrid, FiTag } from 'react-icons/fi'
 import SideList from './SideList'
 
 type ProductViewerProps = {
@@ -11,20 +11,20 @@ type ProductViewerProps = {
 }
 
 const stats = [
-  {
-    label: "Cleaning Programs",
-    value: 3,
-    icon: FiDroplet,
+   {
+    label: "SKU",
+    value: "093858",
+    icon: FiHash,
   },
   {
-    label: "Service",
-    value: 66,
-    icon: FiSettings,
+    label: "Categories",
+    value: "Supplements, Vitamins",
+    icon: FiGrid,
   },
   {
-    label: "G Protein",
-    value: 21,
-    icon: FiActivity,
+    label: "Tag",
+    value: "Vitamins",
+    icon: FiTag,
   },
 ];
 
