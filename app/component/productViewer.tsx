@@ -1,13 +1,32 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { FiPlus, FiMinus, FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
+import { FiPlus, FiMinus, FiX, FiChevronLeft, FiChevronRight, FiDroplet, FiSettings, FiActivity } from 'react-icons/fi'
+import SideList from './SideList'
 
 type ProductViewerProps = {
   images: string[]
   title: string
   unitPrice: number // price per unit
 }
+
+const stats = [
+  {
+    label: "Cleaning Programs",
+    value: 3,
+    icon: FiDroplet,
+  },
+  {
+    label: "Service",
+    value: 66,
+    icon: FiSettings,
+  },
+  {
+    label: "G Protein",
+    value: 21,
+    icon: FiActivity,
+  },
+];
 
 export default function ProductViewer({ images, title, unitPrice }: ProductViewerProps) {
   const [mainIndex, setMainIndex] = useState(0)
@@ -66,7 +85,11 @@ export default function ProductViewer({ images, title, unitPrice }: ProductViewe
       <div className="flex flex-col justify-start w-full lg:w-1/2">
         <h1 className="font-semibold text-[#2B27AF] text-2xl md:text-3xl">{title}</h1>
 
-        <div className="mt-6 font-bold text-blue-600 text-lg md:text-2xl">DOP.${unitPrice.toLocaleString()}</div>
+
+
+        <SideList items={stats} />
+
+        <div className="mt-2 font-bold text-blue-600 text-lg md:text-2xl">DOP.${unitPrice.toLocaleString()}</div>
 
         <div className="bg-gray-50 mt-6 p-4 rounded-lg max-w-sm">
           <div className="flex items-center gap-3">
