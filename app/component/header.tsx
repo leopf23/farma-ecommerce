@@ -1,5 +1,5 @@
 "use client"
-
+import { useRouter } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { FiSearch, FiPhone, FiChevronDown, FiMenu, FiX, FiShoppingCart, FiHeart, FiRepeat } from 'react-icons/fi'
@@ -16,6 +16,15 @@ const CATEGORIES = [
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const panelRef = useRef<HTMLDivElement | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const router = useRouter()
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${searchQuery}`)
+    }
+  }
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
@@ -63,7 +72,7 @@ export default function Header() {
 
           {/* Center: Search - stacked on mobile */}
           <div className="flex-1 px-4">
-            <form className="w-50 md:w-full">
+            <form onSubmit={handleSearch} className="w-50 md:w-full">
               <div className="hidden md:flex items-center bg-gray-100 rounded-full overflow-hidden">
                 <select className="bg-transparent py-3 pr-3 pl-4 outline-none text-gray-700 text-sm" aria-label="Categorías">
                   <option>Categorías</option>
@@ -71,11 +80,13 @@ export default function Header() {
                   <option>Belleza</option>
                   <option>Higiene</option>
                 </select>
-           
+
                 <input
                   className="flex-1 bg-transparent py-3 outline-none text-gray-800 text-sm placeholder-gray-500"
                   type="search"
                   placeholder="Que quieres buscar ?"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
                 <button type="submit" className="bg-red-500 hover:bg-red-600 px-5 py-3 rounded-r-full text-white">
                   <FiSearch />
@@ -91,6 +102,8 @@ export default function Header() {
                   className="flex-1 bg-transparent px-2 py-2 outline-none text-gray-800 text-sm placeholder-gray-500"
                   type="search"
                   placeholder="Que quieres buscar ?"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
                 <button type="submit" className="bg-red-500 hover:bg-red-600 px-3 py-2 text-white">
                   <FiSearch />
