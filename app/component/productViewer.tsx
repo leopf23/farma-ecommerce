@@ -16,7 +16,12 @@ export default function ProductViewer({ images, title, unitPrice }: ProductViewe
 
   useEffect(() => {
     if (isOpen) document.body.style.overflow = 'hidden'
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false)
+    }
+    window.addEventListener('keydown', handleEscape)
     return () => {
+      window.removeEventListener('keydown', handleEscape)
       document.body.style.overflow = ''
     }
   }, [isOpen])
@@ -38,7 +43,7 @@ export default function ProductViewer({ images, title, unitPrice }: ProductViewe
             <img
               src={images[mainIndex]}
               alt={title}
-              className="w-full h-96 md:h-[28rem] object-contain hover:scale-105 transition-transform duration-300 transform"
+              className="w-full h-96 md:h-112 object-contain hover:scale-105 transition-transform duration-300 transform"
             />
           </div>
 

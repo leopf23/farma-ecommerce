@@ -62,7 +62,7 @@ export default function Home() {
       </div>
 
       {/* Banner secundario */}
-      <Banner imageUrl="/banner2.png" />
+      <Banner height="h-46" imageUrl="/banner2.png" />
 
       {/* Más productos */}
       <h2 className="my-10 font-bold text-[#373577] text-2xl text-center">
