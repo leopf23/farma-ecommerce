@@ -1,7 +1,7 @@
-import Banner from "./component/banner";
-import MultiCard from "./component/multiCard";
-import CardProduct from "./component/cardProduct";
-import HorizontalProduct from "./component/horizontalProduct";
+import Banner from "../component/banner";
+import MultiCard from "../component/multiCard";
+import CardProduct from "../component/cardProduct";
+import HorizontalProduct from "../component/horizontalProduct";
 
 import { CiApple, CiStar } from "react-icons/ci";
 import { PiBabyCarriageLight, PiPillLight } from "react-icons/pi";

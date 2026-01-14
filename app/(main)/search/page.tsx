@@ -1,8 +1,8 @@
 "use client"
 import { useSearchParams } from 'next/navigation'
 import React, { Suspense } from 'react'
-import { products } from '../data/products'
-import CardProduct from '../component/cardProduct'
+import { products } from '../../data/products'
+import CardProduct from '../../component/cardProduct'
 
 function SearchResults() {
   const searchParams = useSearchParams()
