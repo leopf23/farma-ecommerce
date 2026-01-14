@@ -77,7 +77,7 @@ export default function Page() {
                         </div>
 
                         <div className="mb-4">
-                            <div className="flex items-center">
+                            <div className="relative flex items-center">
                                 <input
                                     aria-label="contraseña"
                                     type={showPassword ? "text" : "password"}
@@ -85,21 +85,21 @@ export default function Page() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     className={`flex-1 px-4 py-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 ${passError ? "border-red-500 bg-red-50" : "border-gray-200"}`}
+                                    style={{ paddingRight: "2.5rem" }}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
                                     aria-label="mostrar contraseña"
-                                    className="ml-2 text-lg">
-                                        
-                                    {showPassword ? <FaRegEyeSlash />
-                                        : <FaRegEye />
-                                    }
+                                    className="top-1/2 right-3 absolute text-gray-500 hover:text-gray-700 text-lg -translate-y-1/2 transform"
+                                    tabIndex={-1}
+                                >
+                                    {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
                                 </button>
-
                             </div>
                             {passError && <small className="block mt-2 text-red-600 text-sm">{passError}</small>}
                         </div>
+
 
                         <div className="flex justify-between items-center mb-4">
                             <label className="flex items-center gap-2 text-gray-700">

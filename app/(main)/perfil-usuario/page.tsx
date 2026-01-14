@@ -655,7 +655,7 @@ export default function PerfilUsuarioPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       {method.isDefault ? (
-                        <span className="bg-[#373577] bg-opacity-10 px-3 py-1 rounded-full font-medium text-[#373577] text-xs">
+                        <span className="bg-[#373577] bg-opacity-10 px-3 py-1 rounded-full font-medium text-white text-xs">
                           Predeterminado
                         </span>
                       ) : (

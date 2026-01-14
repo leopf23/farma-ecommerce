@@ -200,7 +200,9 @@ export default function TopBar() {
             <div className="py-1">
               {/* Opción: Perfil */}
               <button
-                onClick={() => handleAccountAction('profile')}
+               onClick={() => {
+                window.location.href = '/perfil-usuario'
+              }}
                 className="group flex items-center gap-3 hover:bg-gray-100 px-4 py-3 w-full text-gray-700 text-left transition-colors duration-150"
               >
                 <FiUser className="w-4 h-4 text-gray-500 group-hover:text-blue-600 transition-colors" />
@@ -222,7 +224,7 @@ export default function TopBar() {
               {/* Opción: Cerrar sesión */}
               <button
                 onClick={() => {
-                  window.location.href = 'http://localhost:3000/login'
+                  window.location.href = '/login'
                 }}
                 className="group flex items-center gap-3 hover:bg-red-50 px-4 py-3 w-full text-red-600 text-left transition-colors duration-150"
               >
