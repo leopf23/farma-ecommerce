@@ -24,3 +24,19 @@ body {
   color: #000;
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Animaciones para los dropdowns del TopBar */
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dropdown-enter {
+  animation: fadeInSlide 0.2s ease-out forwards;
+}
