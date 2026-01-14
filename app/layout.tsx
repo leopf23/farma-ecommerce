@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Farma Ecommerce",
+  title: "Farmaextra",
   description: "Farmacia y suplementos online",
 };
 

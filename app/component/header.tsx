@@ -143,14 +143,17 @@ export default function Header() {
                 ))}
               </nav>
 
-              <div className="hidden md:flex items-center gap-4 text-gray-600">
+              <div className="hidden md:flex items-center gap-4 text-gray-600 cursor-pointer">
                 <button className="hover:bg-gray-100 p-2 rounded-md">
                   <FiRepeat />
                 </button>
-                <button className="hover:bg-gray-100 p-2 rounded-md">
+                <button className="hover:bg-gray-100 p-2 rounded-md cursor-pointer">
                   <FiHeart />
                 </button>
-                <button className="hover:bg-gray-100 p-2 rounded-md">
+                <button
+                  className="hover:bg-gray-100 p-2 rounded-md cursor-pointer"
+                  onClick={() => router.push('/shop')}
+                >
                   <FiShoppingCart />
                 </button>
               </div>
