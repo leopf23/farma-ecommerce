@@ -446,7 +446,7 @@ export default function FormShop({
               type="submit"
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="bg-[#E46A5E] hover:bg-[#d45a4e] disabled:bg-gray-400 px-6 py-3 md:py-4 rounded-lg w-full font-semibold text-white text-sm md:text-base transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed"
+              className="bg-[#36367A] hover:bg-[#303055] disabled:bg-gray-400 px-6 py-3 md:py-4 rounded-lg w-full font-semibold text-white text-sm md:text-base transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Procesando...' : 'Proceder Orden'}
             </button>
