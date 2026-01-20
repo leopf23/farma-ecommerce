@@ -222,8 +222,8 @@ export default function Page() {
 
                             <button className="bg-[#36367A] hover:bg-[#303055] mt-2 py-3 rounded-lg w-full font-semibold text-white cursor-pointer" type="submit">Iniciar sesión</button>
 
-                            <button type="button" className="flex justify-center items-center gap-2 bg-gray-800 mt-3 py-3 rounded-lg w-full text-white cursor-pointer">
-                                <span className="bg-white px-2 py-0.5 rounded text-black">G</span> Iniciar con google
+                            <button type="button" className="flex justify-center items-center gap-2 bg-[#F0F0F0] mt-3 py-3 rounded-lg w-full text-gray-800 cursor-pointer">
+                                <span className="bg-white px-2 py-0.5 rounded text-red-500">G</span> Iniciar con google
                             </button>
 
                             <p className="mt-4 text-gray-500 text-sm text-center">
