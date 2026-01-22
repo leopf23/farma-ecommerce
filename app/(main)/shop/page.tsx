@@ -236,7 +236,7 @@ export default function ShopPage() {
                 onClick={handleBuyNow}
                 className="bg-[#36367A] hover:bg-[#303055] px-6 py-3 md:py-4 rounded-lg w-full text-white text-sm md:text-base transition-colors duration-200 cursor-pointer"
               >
-                Comprar a hora
+               Proceder compra
               </button>
 
               {/* Botón secundario: Seguir comprando */}

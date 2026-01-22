@@ -70,9 +70,9 @@ export default function Home() {
       </h2>
 
       <div className="gap-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-20">
-        <HorizontalProduct image="/profile.png" title="Premium whey Proteina" price={100} />
-        <HorizontalProduct image="/profile.png" title="Premium whey Proteina" price={100} />
-        <HorizontalProduct image="/profile.png" title="Premium whey Proteina" price={100} />
+        <HorizontalProduct image="/producto.png" title="Premium whey Proteina" price={100} />
+        <HorizontalProduct image="/producto.png" title="Premium whey Proteina" price={100} />
+        <HorizontalProduct image="/producto.png" title="Premium whey Proteina" price={100} />
       </div>
     </>
   );

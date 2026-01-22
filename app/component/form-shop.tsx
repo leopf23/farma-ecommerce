@@ -17,11 +17,43 @@ interface FormData {
   direccion: string
   correo: string
   telefono: string
+  sucursal: string
   nota: string
 }
 
 // Tipo para los métodos de pago
 type PaymentMethod = 'transferencia' | 'efectivo'
+
+// Tipo para las sucursales
+interface Sucursal {
+  id: string
+  nombre: string
+  direccion: string
+}
+
+// Lista de sucursales disponibles
+const sucursales: Sucursal[] = [
+  {
+    id: '1',
+    nombre: 'Sucursal Principal - La Trinitaria',
+    direccion: 'Av. Juan Pablo Duarte No. 104, Plaza Corona'
+  },
+  {
+    id: '2',
+    nombre: 'Sucursal Norte',
+    direccion: 'Av. Winston Churchill, Plaza Central'
+  },
+  {
+    id: '3',
+    nombre: 'Sucursal Este',
+    direccion: 'Av. Máximo Gómez, Los Prados'
+  },
+  {
+    id: '4',
+    nombre: 'Sucursal Oeste',
+    direccion: 'Av. 27 de Febrero, Bella Vista'
+  }
+]
 
 // Props del componente
 interface FormShopProps {
@@ -78,6 +110,7 @@ export default function FormShop({
     direccion: '',
     correo: '',
     telefono: '',
+    sucursal: '',
     nota: '',
   })
 
@@ -138,6 +171,11 @@ export default function FormShop({
       newErrors.telefono = 'El teléfono es requerido'
     } else if (!/^[\d\s\-\(\)]+$/.test(formData.telefono)) {
       newErrors.telefono = 'El teléfono no es válido'
+    }
+
+    // Validar sucursal
+    if (!formData.sucursal.trim()) {
+      newErrors.sucursal = 'La sucursal es requerida'
     }
 
     setErrors(newErrors)
@@ -271,6 +309,34 @@ export default function FormShop({
               />
               {errors.direccion && (
                 <p className="mt-1 text-red-500 text-sm">{errors.direccion}</p>
+              )}
+            </div>
+
+            {/* Campo Sucursal (ancho completo) */}
+            <div>
+              <label 
+                htmlFor="sucursal" 
+                className="block mb-2 font-medium text-gray-700 text-sm md:text-base"
+              >
+                Sucursal
+              </label>
+              <select
+                id="sucursal"
+                value={formData.sucursal}
+                onChange={(e) => handleInputChange('sucursal', e.target.value)}
+                className={`w-full px-4 py-2 md:py-3 border rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition appearance-none bg-white ${
+                  errors.sucursal ? 'border-red-500' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Selecciona una sucursal</option>
+                {sucursales.map((sucursal) => (
+                  <option key={sucursal.id} value={sucursal.id}>
+                    {sucursal.nombre}
+                  </option>
+                ))}
+              </select>
+              {errors.sucursal && (
+                <p className="mt-1 text-red-500 text-sm">{errors.sucursal}</p>
               )}
             </div>
 

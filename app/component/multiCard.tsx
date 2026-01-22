@@ -16,7 +16,7 @@ function chunkArray<T>(arr: T[], size: number) {
 
 const defaultProducts: Product[] = [
     { id: 1, title: 'Multi-vitaminas', subtitle: 'Gloryfeel · Cap 450', image: '/producto2.png' },
-    { id: 2, title: 'Winasorb Infantil', subtitle: 'Jarabe. Abbot, 60ml' },
+    { id: 2, title: 'Winasorb Infantil', subtitle: 'Jarabe. Abbot, 60ml', image: '/producto2.png' },
     { id: 3, title: 'Rangel Complejo B', subtitle: 'Suplemento vitaminico', image: '/producto2.png' },
     { id: 4, title: 'Winasorb Infantil', subtitle: 'Jarabe. Abbot, 60ml' },
     { id: 5, title: 'Winasorb Infantil', subtitle: 'Jarabe. Abbot, 60ml' },
