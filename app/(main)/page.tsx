@@ -54,11 +54,11 @@ export default function Home() {
 
       {/* Productos */}
       <div className="gap-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 mb-20">
-        <CardProduct image="/profile.png" category="Proteina" title="Premium whey Proteina" price={100} />
-        <CardProduct image="/profile.png" category="Proteina" title="BCAA Aminoácido" price={1500} />
-        <CardProduct image="/profile.png" category="Proteina" title="Multi-vitaminas" price={3000} />
-        <CardProduct image="/profile.png" category="Proteina" title="Premium whey Proteina" price={4000} />
-        <CardProduct image="/profile.png" category="Proteina" title="BCAA Aminoácido" price={7000} />
+        <CardProduct image="/producto.png" category="Proteina" title="Premium whey Proteina" price={100} />
+        <CardProduct image="/producto.png" category="Proteina" title="BCAA Aminoácido" price={1500} />
+        <CardProduct image="/producto.png" category="Proteina" title="Multi-vitaminas" price={3000} />
+        <CardProduct image="/producto.png" category="Proteina" title="Premium whey Proteina" price={4000} />
+        <CardProduct image="/producto.png" category="Proteina" title="BCAA Aminoácido" price={7000} />
       </div>
 
       {/* Banner secundario */}

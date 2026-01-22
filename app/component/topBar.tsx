@@ -118,60 +118,8 @@ export default function TopBar() {
 
   return (
     <div className='flex justify-end items-center gap-6 bg-[#3183E6] px-4 py-3 pr-10 text-white'>
-      {/* Selector de Moneda */}
-      <div className="relative" ref={currencyDropdownRef}>
-        <button
-          onClick={() => {
-            setCurrencyDropdownOpen(!currencyDropdownOpen)
-            setAccountDropdownOpen(false) // Cerrar el otro dropdown si está abierto
-          }}
-          className="flex items-center gap-2 hover:bg-blue-600 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600 transition-colors duration-200"
-          aria-expanded={currencyDropdownOpen}
-          aria-haspopup="true"
-          aria-label="Seleccionar moneda"
-        >
-          <FiDollarSign className="w-4 h-4" />
-          <span className="font-medium text-sm">{selectedCurrency}</span>
-          <FiChevronDown 
-            className={`w-4 h-4 transition-transform duration-200 ${
-              currencyDropdownOpen ? 'rotate-180' : ''
-            }`}
-          />
-        </button>
 
-        {/* Dropdown de Moneda */}
-        {currencyDropdownOpen && (
-          <div className="right-0 z-50 absolute bg-white shadow-xl mt-2 border border-gray-200 rounded-lg w-40 overflow-hidden dropdown-enter">
-            <div className="py-1">
-              <button
-                onClick={() => handleCurrencyChange('USD')}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-100 transition-colors duration-150 ${
-                  selectedCurrency === 'USD' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
-                }`}
-              >
-                <FiDollarSign className="w-4 h-4" />
-                <span className="font-medium text-sm">USD</span>
-                {selectedCurrency === 'USD' && (
-                  <span className="ml-auto text-blue-600">✓</span>
-                )}
-              </button>
-              
-              <button
-                onClick={() => handleCurrencyChange('PESO')}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-100 transition-colors duration-150 ${
-                  selectedCurrency === 'PESO' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
-                }`}
-              >
-                <span className="font-bold text-sm">$</span>
-                <span className="font-medium text-sm">PESO</span>
-                {selectedCurrency === 'PESO' && (
-                  <span className="ml-auto text-blue-600">✓</span>
-                )}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+
 
       {/* Menú Mi Cuenta */}
       <div className="relative" ref={accountDropdownRef}>

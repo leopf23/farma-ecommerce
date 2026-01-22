@@ -13,11 +13,12 @@ export default function CardProduct({ image, category, title, price }: CardProdu
     return (
         <div className="flex flex-col items-center gap-4 mx-auto mb-10 max-w-xs">
             {/* Image container with light background */}
-            <div className="relative flex justify-center items-center bg-linear-to-br from-gray-100 to-gray-50 p-6 rounded-2xl w-full min-h-64 overflow-hidden">
+            <div className="flex justify-center items-center bg-linear-to-br from-gray-100 to-gray-50 p-6 rounded-2xl w-full h-64 overflow-hidden">
                 <Image
                     src={image}
                     alt={title}
-                    fill
+                    width={200}
+                    height={200}
                     className="object-contain"
                 />
             </div>

@@ -15,13 +15,11 @@ function chunkArray<T>(arr: T[], size: number) {
 }
 
 const defaultProducts: Product[] = [
-    { id: 1, title: 'Multi-vitamins', subtitle: 'Gloryfeel · Cap 450', image: '/product1.png' },
-    { id: 2, title: 'Winasorb Infantil', subtitle: 'Jarabe. Abbot, 60ml', image: '/product2.png' },
-    { id: 3, title: 'Rangel Complejo B', subtitle: 'Suplemento vitaminico', image: '/product3.png' },
-    { id: 4, title: 'Winasorb Infantil', subtitle: 'Jarabe. Abbot, 60ml', image: '/product2.png' },
-    { id: 5, title: 'Winasorb Infantil', subtitle: 'Jarabe. Abbot, 60ml', image: '/product2.png' },
-    // Example entry without image to demonstrate "clean" layout
-    // { id: 6, title: 'Sin imagen - Solo texto', subtitle: 'Producto sin imagen de ejemplo' },
+    { id: 1, title: 'Multi-vitaminas', subtitle: 'Gloryfeel · Cap 450', image: '/producto2.png' },
+    { id: 2, title: 'Winasorb Infantil', subtitle: 'Jarabe. Abbot, 60ml' },
+    { id: 3, title: 'Rangel Complejo B', subtitle: 'Suplemento vitaminico', image: '/producto2.png' },
+    { id: 4, title: 'Winasorb Infantil', subtitle: 'Jarabe. Abbot, 60ml' },
+    { id: 5, title: 'Winasorb Infantil', subtitle: 'Jarabe. Abbot, 60ml' },
 ]
 
 function getPositionClassesForFive(index: number) {
@@ -82,26 +80,56 @@ export default function MultiCard({ products }: { products?: Product[] }) {
                     <div key={blockIdx} className={containerCls}>
                         {block.map((p, i) => {
                             const posCls = block.length === 5 ? getPositionClassesForFive(i) : (randomTemplate[i] || '')
-                            const bg = i === 0 ? 'bg-[#D7F3E6]' : i === 2 ? 'bg-[#DDE8FB]' : 'bg-[#E8F7FF]'
-
+                            const bg = i === 0 ? 'bg-[#D7F3E6]' : i === 1 ? 'bg-[#DDE8FB]' : i === 2 ? 'bg-[#E8F7FF]' : i === 3 ? 'bg-[#DDE8FB]' : 'bg-[#D7F3E6]'
+                            const isFeatured = i === 0
+                            const hasImageBelow = i === 2 && p.image
+                            
                             return (
                                 <article
                                     key={p.id}
-                                    className={`rounded-lg p-6 flex flex-col justify-between ${bg}  ${posCls}`}
+                                    className={`rounded-lg p-4 lg:p-5 flex flex-col justify-between ${bg} ${posCls} ${isFeatured ? 'lg:flex-row lg:items-center lg:gap-4' : ''}`}
                                 >
-                                    <div>
-                                        {/* If image exists render it, otherwise render a clean layout without placeholder */}
-                                        {p.image && (
-                                            // image files should be placed in /public for Next.js
-                                            <img src={p.image} alt={p.title} className="mb-4 w-full max-h-40 object-contain" />
-                                        )}
-                                        {p.subtitle && <div className="mb-1 text-gray-600 text-sm">{p.subtitle}</div>}
-                                        <h3 className="mb-4 font-semibold text-[#2B27AF] text-2xl">{p.title}</h3>
-                                    </div>
-
-                                    <div className="mt-4">
-                                        <button className="bg-[#2B27AF] px-4 py-2 rounded-full text-white">Comprar</button>
-                                    </div>
+                                    {isFeatured ? (
+                                        // Layout horizontal para el card destacado: imagen izquierda, texto derecha
+                                        <>
+                                            {p.image && (
+                                                <div className="flex flex-shrink-0 justify-center items-center w-2/5 lg:w-2/5">
+                                                    <img src={p.image} alt={p.title} className="w-full max-h-48 lg:max-h-56 object-contain" />
+                                                </div>
+                                            )}
+                                            <div className="flex flex-col flex-1 justify-between min-h-0">
+                                                <div>
+                                                    <div className="mb-2">
+                                                        <span className="bg-[#2B27AF] px-2 py-1 rounded font-medium text-white text-xs">65% de descuento</span>
+                                                    </div>
+                                                    {p.subtitle && <div className="mb-1 text-gray-600 text-sm">{p.subtitle}</div>}
+                                                    <h3 className="mb-3 font-semibold text-[#2B27AF] text-xl lg:text-2xl">{p.title}</h3>
+                                                </div>
+                                                <div className="mt-auto">
+                                                    <button className="bg-[#2B27AF] hover:bg-[#1f1c8a] px-4 py-2 rounded-full text-white text-sm lg:text-base transition-colors">Comprar</button>
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        // Layout vertical para los otros cards
+                                        <>
+                                            <div className="flex flex-col flex-1">
+                                                <div className="mb-2">
+                                                    <span className="bg-[#2B27AF] px-2 py-1 rounded font-medium text-white text-xs">65% de descuento</span>
+                                                </div>
+                                                {p.subtitle && <div className="mb-1 text-gray-600 text-sm">{p.subtitle}</div>}
+                                                <h3 className={`mb-3 font-semibold text-[#2B27AF] text-lg lg:text-xl ${hasImageBelow ? '' : 'mb-4'}`}>{p.title}</h3>
+                                                {hasImageBelow && (
+                                                    <div className="flex justify-center mb-3">
+                                                        <img src={p.image} alt={p.title} className="w-full max-h-32 object-contain" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="mt-auto">
+                                                <button className="bg-[#2B27AF] hover:bg-[#1f1c8a] px-4 py-2 rounded-full text-white text-sm lg:text-base transition-colors">Comprar</button>
+                                            </div>
+                                        </>
+                                    )}
                                 </article>
                             )
                         })}
