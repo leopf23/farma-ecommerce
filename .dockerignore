@@ -1,0 +1,21 @@
+# Dependencies - must not copy host node_modules (has wrong platform binaries)
+node_modules
+
+# Build outputs
+.next
+out
+build
+
+# Git
+.git
+.gitignore
+
+# Misc
+.DS_Store
+*.md
+.env*
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
