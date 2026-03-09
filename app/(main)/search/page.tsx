@@ -8,7 +8,7 @@ import Pagination from '../../component/Pagination'
 import { useProducts } from '@/src/hooks/Products'
 import { useStoreProducts } from '@/src/hooks/Products/StoreProvider'
 import { useCart } from '@/src/hooks/Cart'
-import { mapProductToCard } from '@/src/utils/productMapper'
+import { mapProductToCard, MappedProduct } from '@/src/utils/productMapper'
 
 function SearchResults() {
   const searchParams = useSearchParams()
@@ -31,7 +31,7 @@ function SearchResults() {
   }, [searchQuery, page, perPage])
 
   const mappedProducts = (products || []).map(mapProductToCard)
-  const recommendedProducts = mappedProducts.slice(0, 4).map((p) => ({
+  const recommendedProducts = mappedProducts.slice(0, 4).map((p: MappedProduct) => ({
     id: p.id,
     image: p.image,
     title: p.title,
@@ -65,7 +65,7 @@ function SearchResults() {
       ) : mappedProducts.length > 0 ? (
         <>
           <div className="gap-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {mappedProducts.map((product) => (
+            {mappedProducts.map((product: MappedProduct) => (
               <CardProduct
                 key={product.id}
                 id={product.id}

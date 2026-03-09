@@ -51,10 +51,10 @@ export function useCart() {
     [dispatch]
   );
 
-  const totalCount = items.reduce((sum, i) => sum + i.quantity, 0);
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const totalCount = items.reduce((sum: number, i: CartItem) => sum + i.quantity, 0);
+  const subtotal = items.reduce((sum: number, i: CartItem) => sum + i.price * i.quantity, 0);
   const isInCart = useCallback(
-    (id: string | number) => items.some((i) => String(i.id) === String(id)),
+    (id: string | number) => items.some((i: CartItem) => String(i.id) === String(id)),
     [items]
   );
 

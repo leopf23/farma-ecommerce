@@ -26,4 +26,4 @@ EXPOSE 80
 #production start
 # CMD ["yarn", "start"]
 #QA staging
-CMD ["yarn", "staging"]
+CMD ["yarn", "start"]

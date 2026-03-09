@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from "react"
+import React, { Suspense, useState } from "react"
 import Image from "next/image";
 import { useRouter, useSearchParams } from 'next/navigation'
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
@@ -17,7 +17,7 @@ interface RegisterForm {
     confirmPassword: string
 }
 
-export default function Page() {
+function LoginForm() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const redirect = searchParams.get('redirect') || '/'
@@ -415,5 +415,20 @@ export default function Page() {
                 </div>
             )}
         </main>
+    )
+}
+
+export default function Page() {
+    return (
+        <Suspense fallback={
+            <main className="flex md:flex-row flex-col min-h-screen">
+                <aside className="hidden md:block md:flex-[1.1] bg-cover bg-center min-h-screen bg-gray-200 animate-pulse" />
+                <section className="flex flex-[0.9] justify-center items-center p-0 sm:p-5 md:p-12">
+                    <div className="w-full max-w-md h-96 rounded-lg bg-gray-100 animate-pulse" />
+                </section>
+            </main>
+        }>
+            <LoginForm />
+        </Suspense>
     )
 }
