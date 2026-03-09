@@ -2,7 +2,10 @@
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { FiSearch, FiPhone, FiChevronDown, FiMenu, FiX, FiShoppingCart, FiHeart, FiRepeat } from 'react-icons/fi'
+import { FiSearch, FiPhone, FiMenu, FiX, FiShoppingCart, FiHeart, FiRepeat } from 'react-icons/fi';
+import { useCategories } from '@/src/hooks/Categories';
+import { useStoreCategories } from '@/src/hooks/Categories/StoreProvider';
+import { useCart } from '@/src/hooks/Cart';
 
 const CATEGORIES = [
   'Todas las categorías',
@@ -18,6 +21,13 @@ export default function Header() {
   const panelRef = useRef<HTMLDivElement | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const router = useRouter()
+  const { getAllCategories } = useCategories();
+  const { categories } = useStoreCategories();
+  const { totalCount } = useCart();
+
+  useEffect(() => {
+    getAllCategories();
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -74,17 +84,17 @@ export default function Header() {
           <div className="flex-1 px-4">
             <form onSubmit={handleSearch} className="w-50 md:w-full">
               <div className="hidden md:flex items-center bg-gray-100 rounded-full overflow-hidden">
-                <select className="bg-transparent py-3 pr-3 pl-4 outline-none text-gray-700 text-sm" aria-label="Categorías">
+                {/* <select className="bg-transparent py-3 pr-3 pl-4 outline-none text-gray-700 text-sm" aria-label="Categorías">
                   <option>Categorías</option>
-                  <option>Salud</option>
-                  <option>Belleza</option>
-                  <option>Higiene</option>
-                </select>
+                  {categories && categories.length > 0 && categories.map(({ familiaUno, id }: any) => (
+                    <option key={id} value={familiaUno}>{familiaUno}</option>
+                  ))}
+                </select> */}
 
                 <input
-                  className="flex-1 bg-transparent py-3 outline-none text-gray-800 text-sm placeholder-gray-500"
+                  className="flex-1 bg-transparent py-3 px-4 outline-none text-gray-800 text-sm placeholder-gray-500"
                   type="search"
-                  placeholder="Que quieres buscar ?"
+                  placeholder="Que deseas buscar?"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -136,25 +146,31 @@ export default function Header() {
               </div>
 
               <nav className="hidden md:flex items-center gap-6 text-gray-600 text-sm">
-                {CATEGORIES.slice(1).map((cat) => (
-                  <a key={cat} href="#" className="hover:text-gray-900">
-                    {cat}
-                  </a>
+                {categories && categories.length > 0 && categories.map(({ familiaUno, id }: any) => (
+                  <Link key={id} href={`/category/${id}`} className="hover:text-gray-900">
+                    {familiaUno}
+                  </Link>
                 ))}
               </nav>
 
               <div className="hidden md:flex items-center gap-4 text-gray-600 cursor-pointer">
-                <button className="hover:bg-gray-100 p-2 rounded-md">
+                {/* <button className="hover:bg-gray-100 p-2 rounded-md">
                   <FiRepeat />
                 </button>
                 <button className="hover:bg-gray-100 p-2 rounded-md cursor-pointer">
                   <FiHeart />
-                </button>
+                </button> */}
                 <button
-                  className="hover:bg-gray-100 p-2 rounded-md cursor-pointer"
+                  className="relative hover:bg-gray-100 p-2 rounded-md cursor-pointer"
                   onClick={() => router.push('/shop')}
+                  aria-label={`Carrito (${totalCount} productos)`}
                 >
-                  <FiShoppingCart />
+                  <FiShoppingCart size={20} />
+                  {totalCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex justify-center items-center min-w-[1.25rem] h-5 px-1 bg-red-500 rounded-full font-bold text-white text-xs">
+                      {totalCount > 99 ? '99+' : totalCount}
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
@@ -182,6 +198,18 @@ export default function Header() {
             </div>
 
             <nav className="space-y-2">
+              <button
+                onClick={() => { router.push('/shop'); setMobileOpen(false); }}
+                className="flex items-center gap-3 w-full hover:bg-gray-100 px-3 py-2 rounded-md text-left"
+              >
+                <FiShoppingCart size={20} />
+                <span>Carrito</span>
+                {totalCount > 0 && (
+                  <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    {totalCount}
+                  </span>
+                )}
+              </button>
               <div className="px-2 py-2 text-gray-500 text-sm">Categorías</div>
               {CATEGORIES.map((cat) => (
                 <a

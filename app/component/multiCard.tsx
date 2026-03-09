@@ -1,11 +1,20 @@
-import React from 'react'
+"use client"
+
+import React, { useState } from 'react'
+import { FiShoppingCart, FiCheck } from 'react-icons/fi'
 
 type Product = {
     id: string | number
     title: string
     subtitle?: string
-    price?: string
+    price?: string | number
     image?: string
+    porcentajeDescuento?: string | number
+}
+
+type MultiCardProps = {
+    products?: Product[]
+    onAddToCart?: (p: Product) => void
 }
 
 function chunkArray<T>(arr: T[], size: number) {
@@ -14,13 +23,13 @@ function chunkArray<T>(arr: T[], size: number) {
     return chunks
 }
 
-const defaultProducts: Product[] = [
-    { id: 1, title: 'Multi-vitaminas', subtitle: 'Gloryfeel · Cap 450', image: '/producto2.png' },
-    { id: 2, title: 'Winasorb Infantil', subtitle: 'Jarabe. Abbot, 60ml', image: '/producto2.png' },
-    { id: 3, title: 'Rangel Complejo B', subtitle: 'Suplemento vitaminico', image: '/producto2.png' },
-    { id: 4, title: 'Winasorb Infantil', subtitle: 'Jarabe. Abbot, 60ml' },
-    { id: 5, title: 'Winasorb Infantil', subtitle: 'Jarabe. Abbot, 60ml' },
-]
+// const defaultProducts: Product[] = [
+//     { id: 1, title: 'Multi-vitaminas', subtitle: 'Gloryfeel · Cap 450', image: '/producto2.png' },
+//     { id: 2, title: 'Winasorb Infantil', subtitle: 'Jarabe. Abbot, 60ml', image: '/producto2.png' },
+//     { id: 3, title: 'Rangel Complejo B', subtitle: 'Suplemento vitaminico', image: '/producto2.png' },
+//     { id: 4, title: 'Winasorb Infantil', subtitle: 'Jarabe. Abbot, 60ml' },
+//     { id: 5, title: 'Winasorb Infantil', subtitle: 'Jarabe. Abbot, 60ml' },
+// ]
 
 function getPositionClassesForFive(index: number) {
     // Use explicit col/row start/span to avoid overlapping areas.
@@ -63,9 +72,46 @@ function getRandomPositionsForLessThanFive(len: number) {
     return pick
 }
 
-export default function MultiCard({ products }: { products?: Product[] }) {
-    const items = products && products.length ? products : defaultProducts
+export default function MultiCard({ products, onAddToCart }: MultiCardProps) {
+    const [addedIds, setAddedIds] = useState<Set<string | number>>(new Set())
+    const items = products && products.length ? products : []
     const blocks = chunkArray(items, 5)
+
+    const handleAdd = (p: Product) => {
+        onAddToCart?.(p)
+        setAddedIds((prev) => new Set(prev).add(p.id))
+        setTimeout(() => setAddedIds((prev) => {
+            const next = new Set(prev)
+            next.delete(p.id)
+            return next
+        }), 2000)
+    }
+
+    const AddToCartButton = ({ p }: { p: Product }) => {
+        const added = addedIds.has(p.id)
+        return (
+            <button
+                onClick={() => handleAdd(p)}
+                className={`flex justify-center items-center gap-2 px-4 py-2 rounded-full text-sm lg:text-base font-medium transition-all duration-300 ${
+                    added
+                        ? 'bg-green-600 text-white'
+                        : 'bg-[#2B27AF] hover:bg-[#1f1c8a] text-white'
+                }`}
+            >
+                {added ? (
+                    <>
+                        <FiCheck size={18} />
+                        ¡Agregado!
+                    </>
+                ) : (
+                    <>
+                        <FiShoppingCart size={18} />
+                        Agregar al carrito
+                    </>
+                )}
+            </button>
+        )
+    }
 
     return (
         <div className="space-y-6">
@@ -82,7 +128,8 @@ export default function MultiCard({ products }: { products?: Product[] }) {
                             const posCls = block.length === 5 ? getPositionClassesForFive(i) : (randomTemplate[i] || '')
                             const bg = i === 0 ? 'bg-[#D7F3E6]' : i === 1 ? 'bg-[#DDE8FB]' : i === 2 ? 'bg-[#E8F7FF]' : i === 3 ? 'bg-[#DDE8FB]' : 'bg-[#D7F3E6]'
                             const isFeatured = i === 0
-                            const hasImageBelow = i === 2 && p.image
+                           // const hasImageBelow = i === 2 && p.image
+                           const hasImageBelow = true
                             
                             return (
                                 <article
@@ -94,19 +141,19 @@ export default function MultiCard({ products }: { products?: Product[] }) {
                                         <>
                                             {p.image && (
                                                 <div className="flex flex-shrink-0 justify-center items-center w-2/5 lg:w-2/5">
-                                                    <img src={p.image} alt={p.title} className="w-full max-h-48 lg:max-h-56 object-contain" />
+                                                    <img src={p.image ?? "/producto2.png"} alt={p.title} className="w-full max-h-48 lg:max-h-56 object-contain" />
                                                 </div>
                                             )}
                                             <div className="flex flex-col flex-1 justify-between min-h-0">
                                                 <div>
                                                     <div className="mb-2">
-                                                        <span className="bg-[#2B27AF] px-2 py-1 rounded font-medium text-white text-xs">65% de descuento</span>
+                                                        <span className="bg-[#2B27AF] px-2 py-1 rounded font-medium text-white text-xs">{p.porcentajeDescuento}% de descuento</span>
                                                     </div>
                                                     {p.subtitle && <div className="mb-1 text-gray-600 text-sm">{p.subtitle}</div>}
                                                     <h3 className="mb-3 font-semibold text-[#2B27AF] text-xl lg:text-2xl">{p.title}</h3>
                                                 </div>
                                                 <div className="mt-auto">
-                                                    <button className="bg-[#2B27AF] hover:bg-[#1f1c8a] px-4 py-2 rounded-full text-white text-sm lg:text-base transition-colors">Comprar</button>
+                                                    <AddToCartButton p={p} />
                                                 </div>
                                             </div>
                                         </>
@@ -115,18 +162,18 @@ export default function MultiCard({ products }: { products?: Product[] }) {
                                         <>
                                             <div className="flex flex-col flex-1">
                                                 <div className="mb-2">
-                                                    <span className="bg-[#2B27AF] px-2 py-1 rounded font-medium text-white text-xs">65% de descuento</span>
+                                                    <span className="bg-[#2B27AF] px-2 py-1 rounded font-medium text-white text-xs">{p.porcentajeDescuento}% de descuento</span>
                                                 </div>
                                                 {p.subtitle && <div className="mb-1 text-gray-600 text-sm">{p.subtitle}</div>}
                                                 <h3 className={`mb-3 font-semibold text-[#2B27AF] text-lg lg:text-xl ${hasImageBelow ? '' : 'mb-4'}`}>{p.title}</h3>
                                                 {hasImageBelow && (
                                                     <div className="flex justify-center mb-3">
-                                                        <img src={p.image} alt={p.title} className="w-full max-h-32 object-contain" />
+                                                        <img src={p.image ?? "/producto2.png"} alt={p.title} className="w-full max-h-32 object-contain" />
                                                     </div>
                                                 )}
                                             </div>
                                             <div className="mt-auto">
-                                                <button className="bg-[#2B27AF] hover:bg-[#1f1c8a] px-4 py-2 rounded-full text-white text-sm lg:text-base transition-colors">Comprar</button>
+                                                <AddToCartButton p={p} />
                                             </div>
                                         </>
                                     )}

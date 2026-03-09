@@ -93,7 +93,7 @@ export default function ProductViewer({ images, title, unitPrice }: ProductViewe
 
           <SideList items={stats} />
 
-          <div className="mt-2 font-bold text-blue-600 text-lg md:text-2xl">DOP.${unitPrice.toLocaleString()}</div>
+          <div className="mt-2 font-bold text-blue-600 text-lg md:text-2xl">DOP ${unitPrice.toLocaleString()}</div>
 
           <div className="bg-gray-50 mt-6 p-4 rounded-lg max-w-sm">
             <div className="flex items-center gap-3">
@@ -106,12 +106,12 @@ export default function ProductViewer({ images, title, unitPrice }: ProductViewe
               </button>
 
               <div className="ml-auto text-gray-600 text-sm">Total</div>
-              <div className="font-semibold text-gray-800 text-lg">DOP.${total.toLocaleString()}</div>
+              <div className="font-semibold text-gray-800 text-lg">DOP ${total.toLocaleString()}</div>
             </div>
 
             <div className="md:flex gap-3 grid mt-4">
               <button className="flex-1 bg-[#2B27AF] py-3 rounded-full text-white cursor-pointer">Agregar al carrito</button>
-              <button className="flex-1 bg-red-500 py-3 rounded-full text-white cursor-pointer">Comprar a hora</button>
+              <button className="flex-1 bg-red-500 py-3 rounded-full text-white cursor-pointer">Agregar al carrito</button>
             </div>
           </div>
 

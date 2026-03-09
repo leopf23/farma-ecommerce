@@ -1,99 +1,30 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import Image from 'next/image'
-
-// Tipo para los items del carrito
-interface CartItem {
-  id: number
-  image: string
-  title: string
-  price: number
-  quantity: number
-}
-
-// Datos de ejemplo del carrito (en producción esto vendría de un estado global o contexto)
-const initialCartItems: CartItem[] = [
-  {
-    id: 1,
-    image: '/profile.png',
-    title: 'Premium whey Proteina',
-    price: 22.00,
-    quantity: 1,
-  },
-  {
-    id: 2,
-    image: '/profile.png',
-    title: 'Premium whey Proteina',
-    price: 22.00,
-    quantity: 1,
-  },
-  {
-    id: 3,
-    image: '/profile.png',
-    title: 'Premium whey Proteina',
-    price: 22.00,
-    quantity: 1,
-  },
-]
+import { useRouter } from 'next/navigation'
+import { useCart } from '@/src/hooks/Cart'
+import { useStoreAuthLogin } from '@/src/hooks/AuthLogin/StoreProvider'
+import type { CartItem } from '@/src/hooks/Cart/cartTypes'
 
 export default function ShopPage() {
-  // Estado para manejar los items del carrito
-  const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems)
+  const router = useRouter()
+  const { user } = useStoreAuthLogin()
+  const { items: cartItems, updateQuantity, removeItem, subtotal } = useCart()
 
-  /**
-   * Actualiza la cantidad de un producto en el carrito
-   * @param id - ID del producto
-   * @param newQuantity - Nueva cantidad (debe ser >= 1)
-   */
-  const updateQuantity = (id: number, newQuantity: number) => {
-    if (newQuantity < 1) return
-    
-    setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    )
-  }
+  const total = subtotal
 
-  /**
-   * Elimina un producto del carrito
-   * @param id - ID del producto a eliminar
-   */
-  const removeItem = (id: number) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== id))
-  }
-
-  // Calcula el subtotal de todos los items
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  )
-
-  // Calcula el total (aquí puedes agregar impuestos, envío, etc.)
-  const total = subtotal // Por ahora el total es igual al subtotal
-
-  // Calcula la cantidad total de productos
-  const totalQuantity = cartItems.reduce(
-    (sum, item) => sum + item.quantity,
-    0
-  )
-
-  /**
-   * Maneja el evento de comprar ahora
-   */
   const handleBuyNow = () => {
-    // Aquí iría la lógica para procesar la compra
-    console.log('Procesando compra...', cartItems)
-    alert('Funcionalidad de compra en desarrollo')
+    if (cartItems.length === 0) return
+    if (!user) {
+      router.push('/login?redirect=/payment')
+      return
+    }
+    router.push('/payment')
   }
 
-  /**
-   * Maneja el evento de seguir comprando
-   */
   const handleContinueShopping = () => {
-    // Redirige a la página principal o catálogo
-    window.location.href = '/'
+    router.push('/')
   }
 
   return (
@@ -132,7 +63,7 @@ export default function ShopPage() {
                 <p>Tu carrito está vacío</p>
               </div>
             ) : (
-              cartItems.map((item, index) => (
+              cartItems.map((item: CartItem, index: number) => (
                 <div key={item.id}>
                   {/* Item del carrito */}
                   <div className="flex flex-col items-start md:items-center gap-4 md:grid md:grid-cols-12 py-4">
@@ -168,7 +99,7 @@ export default function ShopPage() {
                         type="number"
                         min="1"
                         value={item.quantity}
-                        onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
+                        onChange={(e) => updateQuantity(String(item.id), parseInt(e.target.value) || 1)}
                         className="px-3 py-2 border border-gray-300 focus:border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-20 md:w-24 text-sm md:text-base text-center"
                       />
                     </div>
@@ -180,14 +111,14 @@ export default function ShopPage() {
                       </span>
                     </div>
 
-                    {/* Botón eliminar - Solo visible en desktop */}
-                    <div className="hidden md:flex justify-end col-span-1">
+                    {/* Botón eliminar */}
+                    <div className="flex md:justify-end justify-start w-full md:w-auto col-span-1">
                       <button
-                        onClick={() => removeItem(item.id)}
-                        className="font-bold text-red-500 hover:text-red-700 text-lg"
+                        onClick={() => removeItem(String(item.id))}
+                        className="font-bold text-red-500 hover:text-red-700 text-lg p-1"
                         aria-label="Eliminar producto"
                       >
-                        ×
+                        × Eliminar
                       </button>
                     </div>
                   </div>

@@ -1,11 +1,11 @@
 "use client"
 import React, { useState, useEffect, useRef } from 'react'
-import { FiDollarSign, FiUser, FiCreditCard, FiLogOut, FiChevronDown } from 'react-icons/fi'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { FiUser, FiCreditCard, FiLogOut, FiChevronDown } from 'react-icons/fi';
+import { useStoreAuthLogin } from '@/src/hooks/AuthLogin/StoreProvider';
+import { useAuthLogin } from '@/src/hooks/AuthLogin';
 
-/**
- * Tipos de moneda disponibles en el ecommerce
- */
-type Currency = 'USD' | 'PESO'
 
 /**
  * Componente TopBar - Barra superior del ecommerce
@@ -21,34 +21,18 @@ type Currency = 'USD' | 'PESO'
  * - Diseño responsive
  */
 export default function TopBar() {
-  // Estado para controlar la visibilidad del dropdown de moneda
-  const [currencyDropdownOpen, setCurrencyDropdownOpen] = useState(false)
-  
+  const router = useRouter()
+  const { user } = useStoreAuthLogin()
+  const { logout } = useAuthLogin()
+
   // Estado para controlar la visibilidad del dropdown de cuenta
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false)
   
-  // Estado para la moneda seleccionada (por defecto USD)
-  const [selectedCurrency, setSelectedCurrency] = useState<Currency>('USD')
-  
   // Referencias para detectar clicks fuera de los dropdowns
-  const currencyDropdownRef = useRef<HTMLDivElement>(null)
   const accountDropdownRef = useRef<HTMLDivElement>(null)
 
-  /**
-   * Cierra los dropdowns cuando se hace click fuera de ellos
-   * También cierra al presionar la tecla Escape
-   */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Cerrar dropdown de moneda si se hace click fuera
-      if (
-        currencyDropdownRef.current &&
-        !currencyDropdownRef.current.contains(event.target as Node)
-      ) {
-        setCurrencyDropdownOpen(false)
-      }
-      
-      // Cerrar dropdown de cuenta si se hace click fuera
       if (
         accountDropdownRef.current &&
         !accountDropdownRef.current.contains(event.target as Node)
@@ -57,84 +41,44 @@ export default function TopBar() {
       }
     }
 
-    // Cerrar con tecla Escape
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setCurrencyDropdownOpen(false)
-        setAccountDropdownOpen(false)
-      }
+      if (event.key === 'Escape') setAccountDropdownOpen(false)
     }
 
     document.addEventListener('mousedown', handleClickOutside)
     document.addEventListener('keydown', handleEscape)
-
-    // Limpiar event listeners al desmontar el componente
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
       document.removeEventListener('keydown', handleEscape)
     }
   }, [])
 
-  /**
-   * Maneja el cambio de moneda
-   * @param currency - La moneda seleccionada (USD o PESO)
-   */
-  const handleCurrencyChange = (currency: Currency) => {
-    setSelectedCurrency(currency)
-    setCurrencyDropdownOpen(false)
-    // Aquí puedes agregar lógica adicional como actualizar el contexto global,
-    // guardar en localStorage, o hacer una llamada a la API
-    console.log(`Moneda cambiada a: ${currency}`)
+  const handleLogout = () => {
+    setAccountDropdownOpen(false)
+    logout()
+    router.push('/login')
   }
 
-  /**
-   * Maneja las acciones del menú de cuenta
-   * @param action - La acción seleccionada
-   */
   const handleAccountAction = (action: string) => {
     setAccountDropdownOpen(false)
-    
-    switch (action) {
-      case 'profile':
-        // Navegar a la página de perfil
-        console.log('Navegar a perfil')
-        // router.push('/perfil')
-        break
-      case 'payment':
-        // Navegar a métodos de pago
-        console.log('Navegar a métodos de pago')
-        // router.push('/metodos-pago')
-        break
-      case 'logout':
-        // Cerrar sesión
-        console.log('Cerrar sesión')
-        // Aquí puedes agregar la lógica de logout
-        // Ejemplo: signOut(), limpiar tokens, etc.
-        break
-      default:
-        break
-    }
+    if (action === 'logout') handleLogout()
   }
 
   return (
     <div className='flex justify-end items-center gap-6 bg-[#3183E6] px-4 py-3 pr-10 text-white'>
-
-
-
-      {/* Menú Mi Cuenta */}
-      <div className="relative" ref={accountDropdownRef}>
-        <button
-          onClick={() => {
-            setAccountDropdownOpen(!accountDropdownOpen)
-            setCurrencyDropdownOpen(false) // Cerrar el otro dropdown si está abierto
-          }}
+      {user ? (
+        <div className="relative" ref={accountDropdownRef}>
+          <button
+            onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
           className="flex items-center gap-2 hover:bg-blue-600 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600 transition-colors duration-200"
           aria-expanded={accountDropdownOpen}
           aria-haspopup="true"
           aria-label="Menú de cuenta"
         >
           <FiUser className="w-4 h-4" />
-          <span className="font-medium text-sm">Mi cuenta</span>
+          <span className="font-medium text-sm truncate max-w-[140px]">
+            {user?.name || user?.email || 'Mi cuenta'}
+          </span>
           <FiChevronDown 
             className={`w-4 h-4 transition-transform duration-200 ${
               accountDropdownOpen ? 'rotate-180' : ''
@@ -171,9 +115,7 @@ export default function TopBar() {
 
               {/* Opción: Cerrar sesión */}
               <button
-                onClick={() => {
-                  window.location.href = '/login'
-                }}
+                onClick={() => handleAccountAction('logout')}
                 className="group flex items-center gap-3 hover:bg-red-50 px-4 py-3 w-full text-red-600 text-left transition-colors duration-150"
               >
                 <FiLogOut className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -183,6 +125,15 @@ export default function TopBar() {
           </div>
         )}
       </div>
+      ) : (
+        <Link
+          href="/login"
+          className="flex items-center gap-2 hover:bg-blue-600 px-3 py-2 rounded-lg font-medium text-sm transition-colors"
+        >
+          <FiUser className="w-4 h-4" />
+          Iniciar sesión
+        </Link>
+      )}
     </div>
   )
 }

@@ -1,219 +1,260 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useCart } from '@/src/hooks/Cart'
+import { useStoreAuthLogin } from '@/src/hooks/AuthLogin/StoreProvider'
+import { getAll } from '@/src/utils/methods'
+import { setAuthorizationToken } from '@/src/utils/setAuthorizationToken'
+import { getStoredToken } from '@/src/utils/setAuthorizationToken'
+import type { CartItem } from '@/src/hooks/Cart/cartTypes'
 
-// Tipo para los items del pedido
-interface OrderItem {
-  id: number
-  title: string
-  quantity: number
-  price: number
+// Tipo para los métodos de pago del API
+interface PaymentType {
+  id: string | number
+  name?: string
+  nombre?: string
+  [key: string]: unknown
 }
 
-// Tipo para los datos del formulario
-interface FormData {
-  nombre: string
-  apellido: string
-  direccion: string
-  correo: string
-  telefono: string
-  sucursal: string
-  nota: string
+// Tipo para métodos de pago concretos (API /list-method-payment, cuando es tarjeta)
+interface CardInfo {
+  expirationMonth?: string
+  expirationYear?: string
+  type?: string
+  cardNumber?: string
 }
 
-// Tipo para los métodos de pago
-type PaymentMethod = 'transferencia' | 'efectivo'
-
-// Tipo para las sucursales
-interface Sucursal {
-  id: string
-  nombre: string
-  direccion: string
+interface PaymentMethodDetail {
+  id: string | number
+  methodPayments?: { card?: CardInfo; [key: string]: unknown }
+  name?: string
+  nombre?: string
+  [key: string]: unknown
 }
 
-// Lista de sucursales disponibles
-const sucursales: Sucursal[] = [
-  {
-    id: '1',
-    nombre: 'Sucursal Principal - La Trinitaria',
-    direccion: 'Av. Juan Pablo Duarte No. 104, Plaza Corona'
-  },
-  {
-    id: '2',
-    nombre: 'Sucursal Norte',
-    direccion: 'Av. Winston Churchill, Plaza Central'
-  },
-  {
-    id: '3',
-    nombre: 'Sucursal Este',
-    direccion: 'Av. Máximo Gómez, Los Prados'
-  },
-  {
-    id: '4',
-    nombre: 'Sucursal Oeste',
-    direccion: 'Av. 27 de Febrero, Bella Vista'
-  }
-]
+// Tipo para direcciones del cliente (API /client-address?clientId=)
+interface ClientAddress {
+  id: string | number
+  address?: string
+  direccion?: string
+  name?: string
+  nombre?: string
+  location?: string
+  numberHouse?: string
+  [key: string]: unknown
+}
 
 // Props del componente
 interface FormShopProps {
-  // Items del pedido (pueden venir del carrito o ser pasados como props)
-  orderItems?: OrderItem[]
-  // Callback cuando se procesa la orden
-  onOrderSubmit?: (formData: FormData, paymentMethod: PaymentMethod) => void
+  onOrderSubmit?: (
+    paymentMethod: PaymentType | null,
+    orderItems: CartItem[],
+    selectedAddress: ClientAddress | null,
+    selectedCardMethod: PaymentMethodDetail | null
+  ) => void
 }
 
-// Datos de ejemplo del pedido (si no se pasan como props)
-const defaultOrderItems: OrderItem[] = [
-  {
-    id: 1,
-    title: 'Otrivin Breathe Clean Natural Daily Nasal Cleanser × 1',
-    quantity: 1,
-    price: 12.95,
-  },
-  {
-    id: 2,
-    title: 'Otrivin Breathe Clean Natural Daily Nasal Cleanser × 1',
-    quantity: 1,
-    price: 12.95,
-  },
-  {
-    id: 3,
-    title: 'Otrivin Breathe Clean Natural Daily Nasal Cleanser × 1',
-    quantity: 1,
-    price: 12.95,
-  },
-]
-
 /**
- * Componente FormShop - Formulario de pago y facturación
- * 
+ * Componente FormShop - Checkout y método de pago
+ *
  * Características:
- * - Formulario de facturación completo con validación
- * - Resumen de orden con productos y precios
- * - Selección de método de pago (transferencia o efectivo)
- * - Totalmente responsive (mobile, tablet, desktop, desktop XL)
- * - Validación de campos en tiempo real
- * - Manejo de estado local para formulario
- * 
- * @param orderItems - Lista de productos en el pedido (opcional)
- * @param onOrderSubmit - Callback cuando se envía el formulario (opcional)
+ * - Enlace a dirección del cliente (/client-address?clientId=)
+ * - Métodos de pago desde API /types-payment
+ * - Tu Orden con productos del carrito
+ * - Totalmente responsive
  */
-export default function FormShop({ 
-  orderItems = defaultOrderItems,
-  onOrderSubmit 
-}: FormShopProps) {
-  // Estado del formulario
-  const [formData, setFormData] = useState<FormData>({
-    nombre: '',
-    apellido: '',
-    direccion: '',
-    correo: '',
-    telefono: '',
-    sucursal: '',
-    nota: '',
-  })
+export default function FormShop({ onOrderSubmit }: FormShopProps) {
+  const { user } = useStoreAuthLogin()
+  const { items: orderItems, subtotal } = useCart()
 
-  // Estado para errores de validación
-  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({})
+  const clientId = user?.id ?? ''
 
-  // Estado para el método de pago seleccionado
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('transferencia')
-
-  // Estado para indicar si el formulario está siendo enviado
+  const [paymentTypes, setPaymentTypes] = useState<PaymentType[]>([])
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentType | null>(null)
+  const [isLoadingPayments, setIsLoadingPayments] = useState(true)
+  const [paymentError, setPaymentError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  /**
-   * Maneja el cambio en los campos del formulario
-   * @param field - Campo que cambió
-   * @param value - Nuevo valor
-   */
-  const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-    
-    // Limpiar error del campo cuando el usuario empieza a escribir
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }))
+  const [addresses, setAddresses] = useState<ClientAddress[]>([])
+  const [selectedAddressId, setSelectedAddressId] = useState<string>('')
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(false)
+  const [addressError, setAddressError] = useState<string | null>(null)
+
+  const [cardMethods, setCardMethods] = useState<PaymentMethodDetail[]>([])
+  const [selectedCardMethodId, setSelectedCardMethodId] = useState<string>('')
+  const [isLoadingCardMethods, setIsLoadingCardMethods] = useState(false)
+  const [cardMethodsError, setCardMethodsError] = useState<string | null>(null)
+
+  const isCreditCardSelected = Boolean(
+    selectedPaymentMethod &&
+      /tarjeta|credit|credito/i.test(
+        String(
+          selectedPaymentMethod.name ?? selectedPaymentMethod.nombre ?? ''
+        )
+      )
+  )
+
+  useEffect(() => {
+    const token = getStoredToken()
+    if (token) {
+      setAuthorizationToken(token)
     }
+
+    const fetchPaymentTypes = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || ''
+        const data = await getAll(`${baseUrl}/types-payment`)
+        const list = Array.isArray(data) ? data : data?.data ?? data?.items ?? []
+        setPaymentTypes(list)
+        if (list.length > 0 && !selectedPaymentMethod) {
+          setSelectedPaymentMethod(list[0])
+        }
+      } catch (err) {
+        setPaymentError('No se pudieron cargar los métodos de pago')
+        setPaymentTypes([])
+      } finally {
+        setIsLoadingPayments(false)
+      }
+    }
+
+    fetchPaymentTypes()
+  }, [])
+
+  useEffect(() => {
+    if (!clientId) return
+
+    const token = getStoredToken()
+    if (token) {
+      setAuthorizationToken(token)
+    }
+
+    const fetchAddresses = async () => {
+      setIsLoadingAddresses(true)
+      setAddressError(null)
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || ''
+        const data = await getAll(`${baseUrl}/client-address?clientId=${clientId}`)
+        const list = Array.isArray(data) ? data : data?.data ?? data?.items ?? []
+        setAddresses(list)
+        if (list.length > 0 && !selectedAddressId) {
+          setSelectedAddressId(String(list[0].id))
+        }
+      } catch (err) {
+        setAddressError('No se pudieron cargar las direcciones')
+        setAddresses([])
+      } finally {
+        setIsLoadingAddresses(false)
+      }
+    }
+
+    fetchAddresses()
+  }, [clientId])
+
+  useEffect(() => {
+    if (!isCreditCardSelected) {
+      setCardMethods([])
+      setSelectedCardMethodId('')
+      setCardMethodsError(null)
+      return
+    }
+
+    const token = getStoredToken()
+    if (token) {
+      setAuthorizationToken(token)
+    }
+
+    const fetchCardMethods = async () => {
+      setIsLoadingCardMethods(true)
+      setCardMethodsError(null)
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || ''
+        const data = await getAll(`${baseUrl}/list-method-payment`)
+        const list = Array.isArray(data) ? data : data?.data ?? data?.items ?? []
+        setCardMethods(list)
+        setSelectedCardMethodId(list.length > 0 ? String(list[0].id) : '')
+      } catch (err) {
+        setCardMethodsError('No se pudieron cargar los métodos de pago')
+        setCardMethods([])
+        setSelectedCardMethodId('')
+      } finally {
+        setIsLoadingCardMethods(false)
+      }
+    }
+
+    fetchCardMethods()
+  }, [isCreditCardSelected])
+
+  const getAddressDisplayParts = (addr: ClientAddress) => {
+    const name = addr.name ?? addr.nombre ?? ''
+    const numberHouse = addr.numberHouse ?? ''
+    const location = addr.location ?? addr.address ?? addr.direccion ?? ''
+    const line1 = name ? (numberHouse ? `${name}, No. ${numberHouse}` : name) : ''
+    return { line1, location: location || '—' }
   }
 
-  /**
-   * Valida el formulario antes de enviarlo
-   * @returns true si el formulario es válido, false en caso contrario
-   */
-  const validateForm = (): boolean => {
-    const newErrors: Partial<Record<keyof FormData, string>> = {}
-
-    // Validar nombre
-    if (!formData.nombre.trim()) {
-      newErrors.nombre = 'El nombre es requerido'
-    }
-
-    // Validar apellido
-    if (!formData.apellido.trim()) {
-      newErrors.apellido = 'El apellido es requerido'
-    }
-
-    // Validar dirección
-    if (!formData.direccion.trim()) {
-      newErrors.direccion = 'La dirección es requerida'
-    }
-
-    // Validar correo electrónico
-    if (!formData.correo.trim()) {
-      newErrors.correo = 'El correo electrónico es requerido'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.correo)) {
-      newErrors.correo = 'El correo electrónico no es válido'
-    }
-
-    // Validar teléfono
-    if (!formData.telefono.trim()) {
-      newErrors.telefono = 'El teléfono es requerido'
-    } else if (!/^[\d\s\-\(\)]+$/.test(formData.telefono)) {
-      newErrors.telefono = 'El teléfono no es válido'
-    }
-
-    // Validar sucursal
-    if (!formData.sucursal.trim()) {
-      newErrors.sucursal = 'La sucursal es requerida'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+  const formatCardDisplay = (cm: PaymentMethodDetail) => {
+    const card = cm.methodPayments?.card
+    const type = card?.type ? String(card.type).toUpperCase() : 'CARD'
+    const raw = card?.cardNumber ?? ''
+    const number = raw ? raw.replace(/(.{4})/g, '$1 ').trim() : ''
+    const exp =
+      [card?.expirationMonth, card?.expirationYear].filter(Boolean).join('/') ||
+      '—'
+    return { type, number, exp }
   }
 
-  /**
-   * Calcula el subtotal de todos los productos
-   */
-  const calculateSubtotal = (): number => {
-    return orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  }
-
-  /**
-   * Maneja el envío del formulario
-   * @param e - Evento del formulario
-   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Validar formulario
-    if (!validateForm()) {
+    if (!selectedPaymentMethod) {
+      alert('Selecciona un método de pago')
+      return
+    }
+
+    if (
+      isCreditCardSelected &&
+      (cardMethods.length > 0 && !selectedCardMethodId)
+    ) {
+      alert('Selecciona una tarjeta para pagar')
+      return
+    }
+
+    if (!selectedAddressId && addresses.length > 0) {
+      alert('Selecciona una dirección de envío')
+      return
+    }
+
+    if (orderItems.length === 0) {
+      alert('No hay productos en tu orden')
       return
     }
 
     setIsSubmitting(true)
 
+    const selectedAddress = addresses.find(
+      (a) => String(a.id) === selectedAddressId
+    ) ?? null
+
+    const selectedCardMethod =
+      isCreditCardSelected && selectedCardMethodId
+        ? cardMethods.find((c) => String(c.id) === selectedCardMethodId) ??
+          null
+        : null
+
     try {
-      // Si hay un callback, llamarlo
       if (onOrderSubmit) {
-        onOrderSubmit(formData, paymentMethod)
+        onOrderSubmit(
+          selectedPaymentMethod,
+          orderItems,
+          selectedAddress,
+          selectedCardMethod
+        )
       } else {
-        // Por defecto, mostrar los datos en consola
-        console.log('Datos del formulario:', formData)
-        console.log('Método de pago:', paymentMethod)
+        console.log('Método de pago:', selectedPaymentMethod)
+        console.log('Tarjeta seleccionada:', selectedCardMethod)
         console.log('Items del pedido:', orderItems)
-        
-        // Aquí iría la lógica para procesar la orden
+        console.log('Dirección de envío:', selectedAddress)
         alert('Orden procesada correctamente')
       }
     } catch (error) {
@@ -224,189 +265,85 @@ export default function FormShop({
     }
   }
 
-  const subtotal = calculateSubtotal()
-
   return (
     <div className="mx-auto px-4 md:px-0 py-6 md:py-8 lg:py-10 w-full max-w-7xl">
-      {/* Contenedor principal: Formulario y Resumen */}
       <div className="flex lg:flex-row flex-col gap-6 lg:gap-8">
-        
-        {/* Sección izquierda: Detalles de facturación */}
+        {/* Sección izquierda: Dirección de envío (desde /client-address?clientId=, user de /info-users) */}
         <div className="flex-1 bg-white shadow-sm p-4 md:p-6 lg:p-8 rounded-lg">
-          {/* Título de la sección */}
           <h2 className="mb-6 md:mb-8 font-bold text-[#373577] text-xl md:text-2xl">
-            Detalles de facturación
+            Dirección de envío
           </h2>
 
-          {/* Formulario */}
-          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
-            {/* Fila 1: Nombre y Apellido */}
-            <div className="gap-4 md:gap-6 grid grid-cols-1 md:grid-cols-2">
-              {/* Campo Nombre */}
-              <div>
-                <label 
-                  htmlFor="nombre" 
-                  className="block mb-2 font-medium text-gray-700 text-sm md:text-base"
-                >
-                  Nombre
-                </label>
-                <input
-                  type="text"
-                  id="nombre"
-                  value={formData.nombre}
-                  onChange={(e) => handleInputChange('nombre', e.target.value)}
-                  className={`w-full px-4 py-2 md:py-3 border rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
-                    errors.nombre ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="Ingresa tu nombre"
-                />
-                {errors.nombre && (
-                  <p className="mt-1 text-red-500 text-sm">{errors.nombre}</p>
-                )}
-              </div>
-
-              {/* Campo Apellido */}
-              <div>
-                <label 
-                  htmlFor="apellido" 
-                  className="block mb-2 font-medium text-gray-700 text-sm md:text-base"
-                >
-                  Apellido
-                </label>
-                <input
-                  type="text"
-                  id="apellido"
-                  value={formData.apellido}
-                  onChange={(e) => handleInputChange('apellido', e.target.value)}
-                  className={`w-full px-4 py-2 md:py-3 border rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
-                    errors.apellido ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="Ingresa tu apellido"
-                />
-                {errors.apellido && (
-                  <p className="mt-1 text-red-500 text-sm">{errors.apellido}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Campo Dirección (ancho completo) */}
-            <div>
-              <label 
-                htmlFor="direccion" 
-                className="block mb-2 font-medium text-gray-700 text-sm md:text-base"
-              >
-                Dirección
+          {isLoadingAddresses ? (
+            <p className="text-gray-500 text-sm mb-4">Cargando direcciones...</p>
+          ) : addressError ? (
+            <p className="text-red-500 text-sm mb-4">{addressError}</p>
+          ) : addresses.length > 0 ? (
+            <div className="mb-4">
+              <label className="block mb-3 font-medium text-gray-700 text-sm md:text-base">
+                Selecciona tu dirección
               </label>
-              <input
-                type="text"
-                id="direccion"
-                value={formData.direccion}
-                onChange={(e) => handleInputChange('direccion', e.target.value)}
-                className={`w-full px-4 py-2 md:py-3 border rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
-                  errors.direccion ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Ingresa tu dirección completa"
-              />
-              {errors.direccion && (
-                <p className="mt-1 text-red-500 text-sm">{errors.direccion}</p>
-              )}
-            </div>
-
-            {/* Campo Sucursal (ancho completo) */}
-            <div>
-              <label 
-                htmlFor="sucursal" 
-                className="block mb-2 font-medium text-gray-700 text-sm md:text-base"
-              >
-                Sucursal
-              </label>
-              <select
-                id="sucursal"
-                value={formData.sucursal}
-                onChange={(e) => handleInputChange('sucursal', e.target.value)}
-                className={`w-full px-4 py-2 md:py-3 border rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition appearance-none bg-white ${
-                  errors.sucursal ? 'border-red-500' : 'border-gray-300'
-                }`}
-              >
-                <option value="">Selecciona una sucursal</option>
-                {sucursales.map((sucursal) => (
-                  <option key={sucursal.id} value={sucursal.id}>
-                    {sucursal.nombre}
-                  </option>
-                ))}
-              </select>
-              {errors.sucursal && (
-                <p className="mt-1 text-red-500 text-sm">{errors.sucursal}</p>
-              )}
-            </div>
-
-            {/* Fila 2: Correo y Teléfono */}
-            <div className="gap-4 md:gap-6 grid grid-cols-1 md:grid-cols-2">
-              {/* Campo Correo electrónico */}
-              <div>
-                <label 
-                  htmlFor="correo" 
-                  className="block mb-2 font-medium text-gray-700 text-sm md:text-base"
-                >
-                  Correo electrónico
-                </label>
-                <input
-                  type="email"
-                  id="correo"
-                  value={formData.correo}
-                  onChange={(e) => handleInputChange('correo', e.target.value)}
-                  className={`w-full px-4 py-2 md:py-3 border rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
-                    errors.correo ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="correo@ejemplo.com"
-                />
-                {errors.correo && (
-                  <p className="mt-1 text-red-500 text-sm">{errors.correo}</p>
-                )}
-              </div>
-
-              {/* Campo Teléfono */}
-              <div>
-                <label 
-                  htmlFor="telefono" 
-                  className="block mb-2 font-medium text-gray-700 text-sm md:text-base"
-                >
-                  Teléfono
-                </label>
-                <input
-                  type="tel"
-                  id="telefono"
-                  value={formData.telefono}
-                  onChange={(e) => handleInputChange('telefono', e.target.value)}
-                  className={`w-full px-4 py-2 md:py-3 border rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
-                    errors.telefono ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="809-000-0000"
-                />
-                {errors.telefono && (
-                  <p className="mt-1 text-red-500 text-sm">{errors.telefono}</p>
-                )}
+              <div className="space-y-2">
+                {addresses.map((addr) => {
+                  const { line1, location } = getAddressDisplayParts(addr)
+                  const isSelected = selectedAddressId === String(addr.id)
+                  return (
+                    <label
+                      key={String(addr.id)}
+                      className={`flex cursor-pointer rounded-lg border-2 p-3 md:p-4 transition-all ${
+                        isSelected
+                          ? 'border-[#36367A] bg-[#36367A]/5 shadow-sm'
+                          : 'border-gray-200 bg-white hover:border-gray-300'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="address"
+                        value={String(addr.id)}
+                        checked={isSelected}
+                        onChange={() => setSelectedAddressId(String(addr.id))}
+                        className="sr-only"
+                      />
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="flex h-10 w-12 shrink-0 items-center justify-center rounded bg-gray-800 text-white">
+                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          {line1 && (
+                            <p className="font-medium text-gray-800 text-sm md:text-base">
+                              {line1}
+                            </p>
+                          )}
+                          <p className="text-gray-600 text-xs md:text-sm mt-0.5">
+                            {location}
+                          </p>
+                        </div>
+                        {isSelected && (
+                          <div className="shrink-0 h-5 w-5 rounded-full bg-[#36367A] flex items-center justify-center">
+                            <svg className="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    </label>
+                  )
+                })}
               </div>
             </div>
+          ) : (
+            <p className="text-gray-500 text-sm mb-4">No tienes direcciones guardadas.</p>
+          )}
 
-            {/* Campo Nota del pedido (textarea) */}
-            <div>
-              <label 
-                htmlFor="nota" 
-                className="block mb-2 font-medium text-gray-700 text-sm md:text-base"
-              >
-                Nota del pedido
-              </label>
-              <textarea
-                id="nota"
-                value={formData.nota}
-                onChange={(e) => handleInputChange('nota', e.target.value)}
-                rows={4}
-                className="px-4 py-2 md:py-3 border border-gray-300 focus:border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-sm md:text-base transition resize-none"
-                placeholder="Instrucciones especiales para tu pedido (opcional)"
-              />
-            </div>
-          </form>
+          <Link
+            href={`/client-address?clientId=${clientId}`}
+            className="inline-flex items-center gap-2 px-4 py-3 rounded-lg bg-[#36367A] hover:bg-[#303055] text-white font-medium text-sm md:text-base transition-colors"
+          >
+            Gestionar direcciones
+          </Link>
         </div>
 
         {/* Sección derecha: Tu Orden y Método de pago */}
@@ -426,7 +363,7 @@ export default function FormShop({
                     No hay productos en tu orden
                   </p>
                 ) : (
-                  orderItems.map((item) => (
+                  orderItems.map((item: CartItem) => (
                     <div 
                       key={item.id} 
                       className="flex justify-between items-start gap-4"
@@ -467,55 +404,116 @@ export default function FormShop({
               </div>
             </div>
 
-            {/* Sección: Método de pago */}
+            {/* Sección: Método de pago (desde /types-payment) */}
             <div className="mb-6 md:mb-8">
               <h2 className="mb-4 md:mb-6 font-semibold text-[#373577] text-lg md:text-lg">
                 Método de pago
               </h2>
 
-              {/* Opciones de pago */}
-              <div className="space-y-3 md:space-y-4">
-                {/* Opción: Pago por transferencia */}
-                <label className="group flex items-center gap-3 md:gap-4 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="transferencia"
-                    checked={paymentMethod === 'transferencia'}
-                    onChange={() => setPaymentMethod('transferencia')}
-                    className="focus:ring-2 focus:ring-blue-500 w-5 md:w-6 h-5 md:h-6 text-blue-600 cursor-pointer"
-                  />
-                  <span className="text-gray-700 group-hover:text-gray-900 text-sm md:text-base transition">
-                    Pago por transferencia
-                  </span>
-                </label>
+              {isLoadingPayments ? (
+                <p className="text-gray-500 text-sm">Cargando métodos de pago...</p>
+              ) : paymentError ? (
+                <p className="text-red-500 text-sm">{paymentError}</p>
+              ) : (
+                <div className="space-y-3 md:space-y-4">
+                  {paymentTypes.map((pt) => (
+                    <label key={String(pt.id)} className="group flex items-center gap-3 md:gap-4 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value={String(pt.id)}
+                        checked={selectedPaymentMethod?.id === pt.id}
+                        onChange={() => setSelectedPaymentMethod(pt)}
+                        className="focus:ring-2 focus:ring-blue-500 w-5 md:w-6 h-5 md:h-6 text-blue-600 cursor-pointer"
+                      />
+                      <span className="text-gray-700 group-hover:text-gray-900 text-sm md:text-base transition">
+                        {pt.name ?? pt.nombre ?? String(pt.id)}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
 
-                {/* Opción: Pago en efectivo */}
-                <label className="group flex items-center gap-3 md:gap-4 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="efectivo"
-                    checked={paymentMethod === 'efectivo'}
-                    onChange={() => setPaymentMethod('efectivo')}
-                    className="focus:ring-2 focus:ring-blue-500 w-5 md:w-6 h-5 md:h-6 text-blue-600 cursor-pointer"
-                  />
-                  <span className="text-gray-700 group-hover:text-gray-900 text-sm md:text-base transition">
-                    Pago en efectivo
-                  </span>
-                </label>
-              </div>
+              {/* Tarjetas cuando se elige tarjeta de crédito (desde /list-method-payment) */}
+              {isCreditCardSelected && (
+                <div className="mt-4">
+                  <label className="block mb-2 font-medium text-gray-700 text-sm md:text-base">
+                    Selecciona tu tarjeta
+                  </label>
+                  {isLoadingCardMethods ? (
+                    <p className="text-gray-500 text-sm">Cargando tarjetas...</p>
+                  ) : cardMethodsError ? (
+                    <p className="text-red-500 text-sm">{cardMethodsError}</p>
+                  ) : cardMethods.length > 0 ? (
+                    <div className="space-y-2">
+                      {cardMethods.map((cm) => {
+                        const { type, number, exp } = formatCardDisplay(cm)
+                        const isSelected = selectedCardMethodId === String(cm.id)
+                        return (
+                          <label
+                            key={String(cm.id)}
+                            className={`flex cursor-pointer rounded-lg border-2 p-3 md:p-4 transition-all ${
+                              isSelected
+                                ? 'border-[#36367A] bg-[#36367A]/5 shadow-sm'
+                                : 'border-gray-200 bg-white hover:border-gray-300'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="cardMethod"
+                              value={String(cm.id)}
+                              checked={isSelected}
+                              onChange={() => setSelectedCardMethodId(String(cm.id))}
+                              className="sr-only"
+                            />
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div className="flex h-10 w-12 shrink-0 items-center justify-center rounded bg-gray-800 text-white text-xs font-bold">
+                                {type || 'CARD'}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="font-mono text-sm md:text-base font-medium text-gray-800 tracking-wide">
+                                  {number || `•••• •••• •••• ${String(cm.id)}`}
+                                </p>
+                                <p className="text-gray-500 text-xs mt-0.5">
+                                  Vence {exp || '—'}
+                                </p>
+                              </div>
+                              {isSelected && (
+                                <div className="shrink-0 h-5 w-5 rounded-full bg-[#36367A] flex items-center justify-center">
+                                  <svg className="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                              )}
+                            </div>
+                          </label>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm">No hay tarjetas disponibles.</p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Botón: Proceder Orden */}
-            <button
-              type="submit"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="bg-[#36367A] hover:bg-[#303055] disabled:bg-gray-400 px-6 py-3 md:py-4 rounded-lg w-full font-semibold text-white text-sm md:text-base transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? 'Procesando...' : 'Proceder Orden'}
-            </button>
+            <form onSubmit={handleSubmit}>
+              <button
+                type="submit"
+                disabled={
+                  isSubmitting ||
+                  orderItems.length === 0 ||
+                  (addresses.length > 0 && !selectedAddressId) ||
+                  (isCreditCardSelected &&
+                    cardMethods.length > 0 &&
+                    !selectedCardMethodId)
+                }
+                className="bg-[#36367A] hover:bg-[#303055] disabled:bg-gray-400 px-6 py-3 md:py-4 rounded-lg w-full font-semibold text-white text-sm md:text-base transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Procesando...' : 'Proceder Orden'}
+              </button>
+            </form>
           </div>
         </div>
       </div>

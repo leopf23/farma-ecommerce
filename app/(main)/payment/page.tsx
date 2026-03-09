@@ -1,35 +1,54 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import FormShop from '../../component/form-shop'
+import { getStoredToken } from '@/src/utils/setAuthorizationToken'
 
 /**
  * Página de Pago - Checkout
- * 
- * Esta página muestra el formulario de facturación y pago
- * utilizando el componente FormShop.
- * 
- * Características:
- * - Integración del componente FormShop
- * - Manejo de la orden de compra
- * - Redirección después del pago
+ * Requiere sesión iniciada. Si no hay token, redirige a /login.
  */
 export default function PaymentPage() {
+  const router = useRouter()
+  const [hasToken, setHasToken] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    const token = getStoredToken()
+    if (!token) {
+      router.replace('/login?redirect=/payment')
+    } else {
+      setHasToken(true)
+    }
+  }, [router])
   /**
    * Maneja el envío de la orden
-   * @param formData - Datos del formulario de facturación
-   * @param paymentMethod - Método de pago seleccionado
+   * @param paymentMethod - Método de pago seleccionado (desde /types-payment)
+   * @param orderItems - Productos del carrito a pagar
+   * @param selectedAddress - Dirección de envío (desde /client-address?clientId=)
+   * @param selectedCardMethod - Tarjeta seleccionada (desde /list-method-payment, cuando es tarjeta)
    */
-  const handleOrderSubmit = (formData: any, paymentMethod: 'transferencia' | 'efectivo') => {
-    // Aquí puedes agregar la lógica para procesar la orden
-    // Por ejemplo, enviar a un API, guardar en base de datos, etc.
+  const handleOrderSubmit = (
+    paymentMethod: any,
+    orderItems: any[],
+    selectedAddress: any,
+    selectedCardMethod: any
+  ) => {
     console.log('Orden procesada:', {
-      formData,
       paymentMethod,
+      orderItems,
+      selectedAddress,
+      selectedCardMethod,
     })
-
-    // Ejemplo: Redirigir a una página de confirmación
     // router.push('/order-confirmation')
+  }
+
+  if (hasToken !== true) {
+    return (
+      <div className="flex justify-center items-center min-h-[50vh] text-gray-500">
+        Redirigiendo al inicio de sesión...
+      </div>
+    )
   }
 
   return (

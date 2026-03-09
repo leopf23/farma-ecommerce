@@ -1,9 +1,10 @@
 "use client"
 import React, { useState } from "react"
 import Image from "next/image";
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
-import { FiUser, FiMail, FiPhone, FiMapPin, FiCheck, FiX } from "react-icons/fi";
+import { FiUser, FiMail, FiPhone, FiMapPin, FiCheck } from "react-icons/fi";
+import { useAuthLogin } from "@/src/hooks/AuthLogin";
 
 interface RegisterForm {
     name: string
@@ -18,8 +19,12 @@ interface RegisterForm {
 
 export default function Page() {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const redirect = searchParams.get('redirect') || '/'
+    const { postAuthLogin } = useAuthLogin()
     const [isRegister, setIsRegister] = useState(false)
     const [username, setUsername] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
     const [password, setPassword] = useState("")
     const [userError, setUserError] = useState("")
     const [passError, setPassError] = useState("")
@@ -42,29 +47,38 @@ export default function Page() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const [showSuccessModal, setShowSuccessModal] = useState(false)
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setUserError("")
         setPassError("")
         setAuthError("")
 
-        // Basic empty validation
-        if (!username) setUserError("Ingresa tu usuario")
-        if (!password) setPassError("Ingresa tu contraseña")
+        if (!username.trim()) {
+            setUserError("Ingresa tu correo electrónico")
+            return
+        }
+        if (!password) {
+            setPassError("Ingresa tu contraseña")
+            return
+        }
 
-        if (!username || !password) return
+        setIsLoading(true)
+        const result: any = await postAuthLogin({
+            email: username.trim(),
+            password,
+        })
+        setIsLoading(false)
 
-        // Credentials check
-        if (username === "user" && password === "farma2026") {
-            // Success: redirect to home
-            router.push("/")
-            setUsername("")
-            setPassword("")
-        } else {
-            setAuthError("Usuario o contraseña incorrectos")
+        if (result?.code === 400) {
+            setAuthError(result.message || "Usuario o contraseña incorrectos")
             setUserError(" ")
             setPassError(" ")
+            return
         }
+
+        router.push(redirect.startsWith('/') ? redirect : `/${redirect}`)
+        setUsername("")
+        setPassword("")
     }
 
     const handleRegisterChange = (field: keyof RegisterForm, value: string) => {
@@ -220,7 +234,13 @@ export default function Page() {
                                 <a className="text-blue-500 text-sm">Olvidaste tu contraseña ?</a>
                             </div>
 
-                            <button className="bg-[#36367A] hover:bg-[#303055] mt-2 py-3 rounded-lg w-full font-semibold text-white cursor-pointer" type="submit">Iniciar sesión</button>
+                            <button
+                                className="bg-[#36367A] hover:bg-[#303055] mt-2 py-3 rounded-lg w-full font-semibold text-white cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+                                type="submit"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
+                            </button>
 
                             <button type="button" className="flex justify-center items-center gap-2 bg-[#F0F0F0] mt-3 py-3 rounded-lg w-full text-gray-800 cursor-pointer">
                                 <span className="bg-white px-2 py-0.5 rounded text-red-500">G</span> Iniciar con google
